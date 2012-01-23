@@ -18,9 +18,8 @@ createDBStructure = (db) ->
 insertLogin = (db, username, password, description) ->
 	db.run 'INSERT INTO logins VALUES (\'' + username + '\', \'' + password + '\', \'' + description + '\')'
 
-listLogins = (db) ->
-	db.each 'SELECT username, password, description FROM logins' , (err, row) ->
-		console.log row.description + ' ' + row.username + ' ' + row.password + ' '
+listLogins = (db, cb) ->
+	db.all 'SELECT username, password, description FROM logins', cb
 
 
 db = new sqlite3.Database 'db.test'
@@ -29,7 +28,7 @@ db.serialize () ->
 	createDBStructure db
 	insertLogin db, 'ryan', 'p@ssword', 'google.com'
 	insertLogin db, 'loginB', 'guess1234', 'amazon.com'
-	listLogins db
+	listLogins db, (err, obj) -> console.log obj
 
 db.close
 
