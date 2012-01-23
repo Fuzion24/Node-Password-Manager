@@ -1,1 +1,10 @@
-A nodejs opensource password manager written in coffee-script. This is more for fun than a serious project
+A nodejs opensource password manager written in coffee-script.
+
+npm install coffee-script
+npm install crypto
+npm install MD5
+npm install sqlite3
+npm install express
+
+To run:
+coffee main.coffee
