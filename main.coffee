@@ -12,25 +12,27 @@ decrypt = (ciphertext, password) ->
 	res = decrypter.update ciphertext, 'hex', 'utf8'
 	res += decrypter.final 'hex'
 
-createDBStructure = (db) ->
-	db.run 'CREATE TABLE IF NOT EXISTS logins (username TEXT, password TEXT, description TEXT);'
+class sqlitedb
+	constructor: (filename) ->
+		@db = new sqlite3.Database(filename)
+		@db.run 'CREATE TABLE IF NOT EXISTS logins (username TEXT, password TEXT, description TEXT);'
+	
+	insertLogin: (username, password, description) ->
+		@db.run 'INSERT INTO logins VALUES (\'' + username + '\', \'' + password + '\', \'' + description + '\')'
+	
+	listLogins: (cb) ->
+		@db.all 'SELECT username, password, description FROM logins', cb
 
-insertLogin = (db, username, password, description) ->
-	db.run 'INSERT INTO logins VALUES (\'' + username + '\', \'' + password + '\', \'' + description + '\')'
+	
+db = new sqlitedb( './db.test' )
 
-listLogins = (db, cb) ->
-	db.all 'SELECT username, password, description FROM logins', cb
+db.insertLogin 'ryan', 'p@ssword', 'google.com'
+db.insertLogin 'loginB', 'guess1234', 'amazon.com'
+
+db.listLogins (err, logins) ->
+	console.log logins
 
 
-db = new sqlite3.Database 'db.test'
-
-db.serialize () ->
-	createDBStructure db
-	insertLogin db, 'ryan', 'p@ssword', 'google.com'
-	insertLogin db, 'loginB', 'guess1234', 'amazon.com'
-	listLogins db, (err, obj) -> console.log obj
-
-db.close
 
 #Test Encryption
 
