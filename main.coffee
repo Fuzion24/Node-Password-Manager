@@ -15,7 +15,8 @@ decrypt = (ciphertext, password) ->
 class sqlitedb
 	constructor: (filename, @secret) ->
 		@db = new sqlite3.Database(filename)
-		@serialize = (func) => 
+	
+	serialize: (func) => 
 			@db.serialize.call(@db, func)
 	
 	initTable: () ->
@@ -28,7 +29,7 @@ class sqlitedb
 	listLogins: (cb) ->
 		@db.all 'SELECT username, password, description FROM logins', cb
 
-		
+
 db = new sqlitedb( './db.test', 'testing' )
 
 db.serialize () ->
