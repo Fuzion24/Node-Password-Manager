@@ -28,6 +28,15 @@ class sqlitedb
 	
 	listLogins: (cb) ->
 		@db.all 'SELECT username, password, description FROM logins', cb
+	
+	decryptLogin: (description, cb) ->
+		#lol SQL injection
+		@db.get "SELECT * FROM logins WHERE description = \"description\"", (err, user) =>
+			if err? then cb err
+			else
+				user.password = decrypt user.password, @secret
+				cb null, user
+
 
 
 db = new sqlitedb( './db.test', 'testing' )
@@ -38,6 +47,9 @@ db.serialize () ->
 	db.insertLogin 'loginB', 'guess1234', 'amazon.com'
 	db.listLogins (err, logins) ->
 		console.log logins
+	db.decryptLogin 'google.com', (err, user) ->
+		console.log user
+
 
 
 
