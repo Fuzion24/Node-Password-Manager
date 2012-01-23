@@ -13,24 +13,30 @@ decrypt = (ciphertext, password) ->
 	res += decrypter.final 'hex'
 
 class sqlitedb
-	constructor: (filename) ->
+	constructor: (filename, @secret) ->
 		@db = new sqlite3.Database(filename)
+		@serialize = (func) => 
+			@db.serialize.call(@db, func)
+	
+	initTable: () ->
 		@db.run 'CREATE TABLE IF NOT EXISTS logins (username TEXT, password TEXT, description TEXT);'
 	
 	insertLogin: (username, password, description) ->
-		@db.run 'INSERT INTO logins VALUES (\'' + username + '\', \'' + password + '\', \'' + description + '\')'
+		enc_password = encrypt password, @secret
+		@db.run 'INSERT INTO logins VALUES (\'' + username + '\', \'' + enc_password + '\', \'' + description + '\')'
 	
 	listLogins: (cb) ->
 		@db.all 'SELECT username, password, description FROM logins', cb
 
-	
-db = new sqlitedb( './db.test' )
+		
+db = new sqlitedb( './db.test', 'testing' )
 
-db.insertLogin 'ryan', 'p@ssword', 'google.com'
-db.insertLogin 'loginB', 'guess1234', 'amazon.com'
-
-db.listLogins (err, logins) ->
-	console.log logins
+db.serialize () ->
+	db.initTable()
+	db.insertLogin 'ryan', 'p@ssword', 'google.com'
+	db.insertLogin 'loginB', 'guess1234', 'amazon.com'
+	db.listLogins (err, logins) ->
+		console.log logins
 
 
 
